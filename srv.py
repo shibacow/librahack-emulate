@@ -14,8 +14,9 @@ def index():
     app.logger.info("cnt={}".format(cnt))
     c.execute("select * from books where count=? order by url limit 200",(str(cnt),))
     data=json.dumps(c.fetchall())
-    c.close()
-    conn.close()
+    #リリース開放処理
+    c.close() #MDISはこのいずれかの処理を怠る
+    conn.close() #MDISはこのいずれかの処理を怠る
     return data
 
 def main():
