@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 import csv
-from collections import Counter
-import re
 import sqlite3
 from contextlib import closing
 dbname = 'books.db'
@@ -15,16 +13,23 @@ def read_data():
 def db_insert():
     with closing(sqlite3.connect(dbname)) as conn:
         c = conn.cursor()
-        create_table = 'create table books (url varchar(64), title varchar(512),ISBN varchar(32))'
+        create_table = 'create table books (url varchar(64), title varchar(512),ISBN varchar(32),count int)'
         c.execute(create_table)
+        create_index = 'create index urlindex on books(url);'
+        c.execute(create_index)
         yield c,conn
+        c.close()
+        conn.close()
 def main():
     for c,conn in db_insert():
         ins=[]
-        insert_sql='insert into books (url,title,ISBN) values (?,?,?)'
-        for dkt in read_data():
-            ins.append((dkt['URL'],dkt[u'タイトル'],dkt['ISBN']))
-        c.executemany(insert_sql,ins)
-        conn.commit()
+        insert_sql='insert into books (url,title,ISBN,count) values (?,?,?,?)'
+        for cnt in range(30): #35万件なので30倍して、１千万件程度にする
+            for dkt in read_data():
+                ins.append((dkt['URL'],dkt[u'タイトル'],dkt['ISBN'],cnt))
+            c.executemany(insert_sql,ins)
+            print(cnt,len(ins))
+            conn.commit()
+            ins=[]
         
 if __name__=='__main__':main()
