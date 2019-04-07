@@ -13,10 +13,14 @@ def read_data():
 def db_insert():
     with closing(sqlite3.connect(dbname)) as conn:
         c = conn.cursor()
-        create_table = 'create table books (url varchar(64), title varchar(512),ISBN varchar(32),count int)'
-        c.execute(create_table)
-        create_index = 'create index urlindex on books(url);'
-        c.execute(create_index)
+        sqls=(
+            'create table books (url varchar(64), title varchar(512),ISBN varchar(32),count int);',
+            'create index urlindex on books(url);',
+            'create index count_index on books(count);',
+            'create index count_url_index on books(count,url);'
+            )
+        for sql in sqls:
+            c.execute(sql)
         yield c,conn
         c.close()
         conn.close()

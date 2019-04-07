@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 import sqlite3
-from flask import Flask
+from flask import Flask,request
 import json
 app=Flask(__name__)
 
@@ -9,7 +9,10 @@ app=Flask(__name__)
 def index():
     conn=sqlite3.connect('books.db')
     c=conn.cursor()
-    c.execute("select * from books order by url limit 200")
+    cnt=request.args.get('count')
+    cnt=int(cnt)
+    app.logger.info("cnt={}".format(cnt))
+    c.execute("select * from books where count=? order by url limit 200",(str(cnt),))
     data=json.dumps(c.fetchall())
     c.close()
     conn.close()
